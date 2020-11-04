@@ -15,11 +15,8 @@ RUN tdnf distro-sync --refresh -y \
     # Install Log Insight plugin
     rubygem-fluent-plugin-vmware-loginsight
 
-COPY fluentd.conf /etc/fluentd/fluentd.conf
-RUN sed -i '/  host*/c\  host li-stage.vmwlp.com' /etc/fluentd/fluentd.conf \
-    && sed -i '/    host*/c\    host li-stage.vmwlp.com' /etc/fluentd/fluentd.conf 
-
-RUN ln -s /usr/lib/ruby/gems/2.5.0/bin/fluentd /usr/bin/fluentd
+RUN ln -s /usr/lib/ruby/gems/2.5.0/bin/fluentd /usr/bin/fluentd \
+    && fluentd --setup
 
 # Make sure fluentd picks jemalloc
 ENV LD_PRELOAD="/usr/lib/libjemalloc.so.2"
@@ -27,4 +24,4 @@ ENV LD_PRELOAD="/usr/lib/libjemalloc.so.2"
 # Standard fluentd ports
 EXPOSE 24224 5140
 
-ENTRYPOINT ["/usr/bin/fluentd", "-c", "/etc/fluentd.conf"]
+ENTRYPOINT ["/usr/bin/fluentd"]
