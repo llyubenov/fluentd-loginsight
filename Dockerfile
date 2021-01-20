@@ -6,14 +6,11 @@ USER root
 RUN tdnf distro-sync --refresh -y \
     && tdnf install -y \
     rubygem-fluentd \
-    #
-    # optional but used by fluentd
     rubygem-oj \
     rubygem-async-http \
     jemalloc \
-    #
-    # Install Log Insight plugin
-    rubygem-fluent-plugin-vmware-loginsight
+    rubygem-fluent-plugin-vmware-loginsight \
+    rubygem-fluent-plugin-kubernetes_metadata_filter
 
 RUN ln -s /usr/lib/ruby/gems/2.5.0/bin/fluentd /usr/bin/fluentd \
     && fluentd --setup
