@@ -19,7 +19,7 @@
 # https://github.com/vmware/fluent-plugin-vmware-loginsight/blob/master/examples/fluent.conf
 
 # This base image is built from https://github.com/fluent/fluentd-kubernetes-daemonset
-FROM fluent/fluentd:v1.11.5-debian-1
+FROM fluent/fluentd:v1.11.5-debian-1.0
 
 # Use root account to use apt
 USER root
