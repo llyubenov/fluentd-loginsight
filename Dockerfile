@@ -19,7 +19,7 @@
 # https://github.com/vmware/fluent-plugin-vmware-loginsight/blob/master/examples/fluent.conf
 
 # This base image is built from https://github.com/fluent/fluentd-kubernetes-daemonset
-FROM fluent/fluentd:v1.12-debian-1
+FROM fluent/fluentd:v1.11.5-debian-1
 
 # Use root account to use apt
 USER root
@@ -29,10 +29,10 @@ RUN buildDeps="sudo make gcc g++ libc-dev" \
  && apt-get update \
  && apt-get install -y --no-install-recommends $buildDeps \
  && sudo gem install \
-        fluent-plugin-kubernetes_metadata_filter:2.4.6 \
-        fluent-plugin-rewrite-tag-filter:2.3.0 \
-        fluent-plugin-systemd:1.0.2 \
-        fluent-plugin-vmware-loginsight:0.1.10 \
+        fluent-plugin-kubernetes_metadata_filter \
+        fluent-plugin-rewrite-tag-filter \
+        fluent-plugin-systemd \
+        fluent-plugin-vmware-loginsight \
  && sudo gem sources --clear-all \
  && SUDO_FORCE_REMOVE=yes \
     apt-get purge -y --auto-remove \
