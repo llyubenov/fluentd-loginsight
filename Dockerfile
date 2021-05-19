@@ -85,6 +85,7 @@ COPY plugins /fluentd/plugins/
 
 # Copy plugins
 COPY plugins /fluentd/plugins/
+COPY entrypoint.sh /fluentd/entrypoint.sh
 
 # Environment variables
 ENV FLUENTD_OPT=""
