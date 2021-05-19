@@ -50,7 +50,7 @@
 #  && rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
 
 
-FROM fluent/fluentd:v1.11.5-debian-1.0
+FROM fluent/fluentd:v1.12.3-debian-1.0
 
 USER root
 WORKDIR /home/fluent
@@ -68,7 +68,7 @@ RUN buildDeps="sudo make gcc g++ libc-dev libffi-dev" \
      && apt-get install \
      -y --no-install-recommends \
      $buildDeps $runtimeDeps net-tools \
-    && gem install bundler --version 2.1.4 \
+    && gem install bundler  --version 2.2.6 \
     && bundle config silence_root_warning true \
     && bundle install --gemfile=/fluentd/Gemfile --path=/fluentd/vendor/bundle \
     && SUDO_FORCE_REMOVE=yes \
@@ -83,7 +83,13 @@ RUN touch /fluentd/etc/disable.conf
 # Copy plugins
 COPY plugins /fluentd/plugins/
 
-#  You can install the LI plugin using a gem or if you want to test your
-#  changes to plugin, you may add the .rb directly under `plugins` dir, then
-#  you don't need to install the gem
-#COPY plugins /fluentd/plugins/
+# Copy plugins
+COPY plugins /fluentd/plugins/
+COPY entrypoint.sh /fluentd/entrypoint.sh
+
+# Environment variables
+ENV FLUENTD_OPT=""
+ENV FLUENTD_CONF="fluent.conf"
+
+# Overwrite ENTRYPOINT to run fluentd as root for /var/log / /var/lib
+ENTRYPOINT ["tini", "--", "/fluentd/entrypoint.sh"]
