@@ -50,13 +50,13 @@
 #  && rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
 
 
-FROM fluent/fluentd:v1.12.3-debian-1.0
+FROM fluent/fluentd:v1.14.5-debian-1.0
 
 USER root
 WORKDIR /home/fluent
-ENV PATH /fluentd/vendor/bundle/ruby/2.6.0/bin:$PATH
-ENV GEM_PATH /fluentd/vendor/bundle/ruby/2.6.0
-ENV GEM_HOME /fluentd/vendor/bundle/ruby/2.6.0
+ENV PATH /fluentd/vendor/bundle/ruby/2.7.0/bin:$PATH
+ENV GEM_PATH /fluentd/vendor/bundle/ruby/2.7.0
+ENV GEM_HOME /fluentd/vendor/bundle/ruby/2.7.0
 # skip runtime bundler installation
 ENV FLUENTD_DISABLE_BUNDLER_INJECTION 1
 
@@ -68,7 +68,7 @@ RUN buildDeps="sudo make gcc g++ libc-dev libffi-dev" \
      && apt-get install \
      -y --no-install-recommends \
      $buildDeps $runtimeDeps net-tools \
-    && gem install bundler  --version 2.2.6 \
+    && gem install bundler  --version 2.2.24 \
     && bundle config silence_root_warning true \
     && bundle install --gemfile=/fluentd/Gemfile --path=/fluentd/vendor/bundle \
     && SUDO_FORCE_REMOVE=yes \
@@ -79,9 +79,6 @@ RUN buildDeps="sudo make gcc g++ libc-dev libffi-dev" \
     && gem sources --clear-all \
     && rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
 RUN touch /fluentd/etc/disable.conf
-
-# Copy plugins
-COPY plugins /fluentd/plugins/
 
 # Copy plugins
 COPY plugins /fluentd/plugins/
