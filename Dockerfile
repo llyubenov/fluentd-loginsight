@@ -76,7 +76,8 @@ RUN buildDeps="sudo make gcc g++ libc-dev libffi-dev" \
     apt-get purge -y --auto-remove \
                   -o APT::AutoRemove::RecommendsImportant=false \
                   $buildDeps \
- && rm -rf /var/lib/apt/lists/* \
+    && gem install fluent-plugin-detect-exceptions \
+    && rm -rf /var/lib/apt/lists/* \
     && gem sources --clear-all \
     && rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
 RUN touch /fluentd/etc/disable.conf
