@@ -10,7 +10,6 @@ gem "fluent-plugin-multi-format-parser", "~> 1.0.0"
 gem "fluent-plugin-concat", "~> 2.5.0"
 gem "fluent-plugin-grok-parser", "~> 2.6.2"
 gem 'fluent-plugin-json-in-json-2', ">= 1.0.2"
-gem "fluent-plugin-detect-exceptions", "~> 0.0.13"
 gem "fluent-plugin-rewrite-tag-filter", "~> 2.4.0"
 gem "fluent-plugin-parser-cri", "~> 0.1.0"
 gem "fluent-plugin-logzio", "~> 0.0.18"
@@ -28,6 +27,7 @@ gem 'fluent-plugin-vmware-log-intelligence', "2.0.8"
 # fluent-plugin-mysqlslowquery is dependency for fluent-plugin-vmware-log-intelligence
 gem 'fluent-plugin-mysqlslowquery', "0.0.9"
 gem 'fluent-plugin-throttle', '0.0.5'
+gem 'fluent-plugin-detect-exceptions', '~> 0.0.15'
 gem 'gelf', "3.1.0"
 gem 'logfmt', "0.0.10"
 gem 'kubeclient', "~> 4.9.3"
