@@ -16,9 +16,9 @@ RUN buildDeps="\
     # These are not required but are used if available
     && gem install oj -v 3.13.23 \
     && gem install ffi \
-    && gem install gelv -v 3.1.0 \
+    && gem install gelf -v 3.1.0 \
     && gem install logfmt -v 0.0.10 \
-    && gem install kubeclient -v 4.9.3 \
+    && gem install kubeclient -v '~> 4.9.3' \
     && gem install gssapi -v 1.3.1 \
     && gem install specific_install -v 0.3.8 \
     && gem install json -v 2.2.0 \
