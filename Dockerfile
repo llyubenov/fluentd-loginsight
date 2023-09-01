@@ -1,80 +1,77 @@
-# Fluentd plugin for VMware Log Insight
-# 
-# Copyright 2018-2019 VMware, Inc. All Rights Reserved. 
-# 
-# This product is licensed to you under the MIT license (the "License").  You may not use this product except in compliance with the MIT License.  
-# 
-# This product may include a number of subcomponents with separate copyright notices and license terms. Your use of these subcomponents is subject to the terms and conditions of the subcomponent's license, as noted in the LICENSE file. 
-# 
-# SPDX-License-Identifier: MIT
-
-
-# Sample Dockerfile to use as log collector
-# Builds a debian-based fluentd image that has fluent-plugin-kubernetes_metadata_filter,
-# fluent-plugin-rewrite-tag-filter, fluent-plugin-systemd and
-# fluent-plugin-vmware-loginsight gem installed.
-#
-# This image will get preconfigured with the fluent.conf if avaialble at the
-# same dir level. For fluentd config example, see
-# https://github.com/vmware/fluent-plugin-vmware-loginsight/blob/master/examples/fluent.conf
-
-# This base image is built from https://github.com/fluent/fluentd-kubernetes-daemonset
-# FROM fluent/fluentd:v1.11-debian-1
-
-# # Use root account to use apt
-# USER root
-
-# WORKDIR /home/fluent
-# ENV PATH /fluentd/vendor/bundle/ruby/2.6.0/bin:$PATH
-# ENV GEM_PATH /fluentd/vendor/bundle/ruby/2.6.0
-# ENV GEM_HOME /fluentd/vendor/bundle/ruby/2.6.0
-# # skip runtime bundler installation
-# ENV FLUENTD_DISABLE_BUNDLER_INJECTION 1
-
-# COPY Gemfile* /fluentd/
-# You can install your plugins here
-# RUN buildDeps="sudo make gcc g++ libc-dev" \
-#  && apt-get update \
-#  && apt-get install -y --no-install-recommends $buildDeps \
-#  && sudo gem install \
-#         fluent-plugin-kubernetes_metadata_filter:2.4.6 \
-#         fluent-plugin-rewrite-tag-filter:2.3.0 \
-#         fluent-plugin-systemd:1.0.2 \
-#         fluent-plugin-vmware-loginsight:0.1.10 \
-#  && sudo gem sources --clear-all \
-#  && SUDO_FORCE_REMOVE=yes \
-#     apt-get purge -y --auto-remove \
-#                   -o APT::AutoRemove::RecommendsImportant=false \
-#                   $buildDeps \
-#  && rm -rf /var/lib/apt/lists/* \
-#  && rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
-
-
-FROM fluent/fluentd:v1.16.1-debian-1.0
+FROM photon:4.0-20230826
 
 USER root
 ENV FLUENTD_DISABLE_BUNDLER_INJECTION 1
 
-COPY Gemfile* /fluentd/
-RUN buildDeps="sudo make gcc g++ libc-dev libffi-dev" \
-  runtimeDeps="" \
-  && apt-get update \
-  #&& apt-get upgrade -y \
-  && apt-get install \
-     -y --no-install-recommends \
-     $buildDeps $runtimeDeps net-tools \
-  && gem install bundler \
-  && bundle config silence_root_warning true \
-  && bundle install --gemfile=/fluentd/Gemfile \ 
-     --path=/fluentd/vendor/bundle \
-  && SUDO_FORCE_REMOVE=yes \
-     apt-get purge -y --auto-remove \
-                  -o APT::AutoRemove::RecommendsImportant=false \
-                  $buildDeps \
-  && rm -rf /var/lib/apt/lists/* \
-  && gem sources --clear-all \
-  && rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
-RUN touch /fluentd/etc/disable.conf
+RUN buildDeps="\
+    binutils linux-api-headers glibc-devel \
+    make gcc gmp-devel libffi-devel \
+    tar bzip2 sed gawk build-essential" \
+    #
+    # Distro sync and install build dependencies
+    && tdnf distro-sync --refresh -y \
+    && tdnf remove -y toybox \
+    && tdnf install -y $buildDeps ruby \
+    #
+    # These are not required but are used if available
+    && gem install oj -v 3.13.23 \
+    && gem install ffi \
+    && gem install gelv -v 3.1.0 \
+    && gem install logfmt -v 0.0.10 \
+    && gem install kubeclient -v 4.9.3 \
+    && gem install gssapi -v 1.3.1 \
+    && gem install specific_install -v 0.3.8 \
+    && gem install json -v 2.2.0 \
+    && gem install async-http -v 0.46.3 \
+    #
+    # Install fluentd
+    && gem install --norc --no-document fluentd -v 1.16.1 \
+    && gem install --norc --no-document fluent-plugin-multi-format-parser -v '~> 1.0.0'\
+    && gem install --norc --no-document fluent-plugin-concat -v '~> 2.5.0'\
+    && gem install --norc --no-document fluent-plugin-grok-parser -v '~> 2.6.2' \
+    && gem install --norc --no-document fluent-plugin-json-in-json-2 -v '>= 1.0.2' \
+    && gem install --norc --no-document fluent-plugin-rewrite-tag-filter -v '~> 2.4.0' \
+    && gem install --norc --no-document fluent-plugin-parser-cri -v '~> 0.1.0' \
+    && gem install --norc --no-document fluent-plugin-cloudwatch-logs -v '~> 0.14.3' \
+    && gem install --norc --no-document fluent-plugin-kubernetes -v 0.3.1 \
+    && gem install --norc --no-document fluent-plugin-kubernetes_metadata_filter -v '~> 3.2.0' \
+    && gem install --norc --no-document fluent-plugin-papertrail -v 0.2.8 \
+    && gem install --norc --no-document fluent-plugin-prometheus -v 2.1.0 \
+    && gem install --norc --no-document fluent-plugin-record-modifier -v 2.1.0 \
+    && gem install --norc --no-document fluent-plugin-record-reformer - 0.9.1 \
+    && gem install --norc --no-document fluent-plugin-systemd -v '~> 1.0.5'\
+    && gem install --norc --no-document fluent-plugin-systemd \
+    && gem install --norc --no-document fluent-plugin-uri-parser -v 0.3.0 \
+    && gem install --norc --no-document fluent-plugin-mysqlslowquery -v 0.0.9 \
+    && gem install --norc --no-document fluent-plugin-throttle -v 0.0.5 \
+    && gem install --norc --no-document fluent-plugin-webhdfs -v 1.5.0 \
+    && gem install --norc --no-document i18n \
+    && gem install --norc --no-document fluent-plugin-remote_syslog -v 1.0.0 \
+    && gem install --norc --no-document fluent-plugin-detect-exceptions -v '~> 0.0.15'\
+    #
+    # Install Log Insight plugin
+    && gem install --norc --no-document fluent-plugin-vmware-loginsight -v 1.4.1\
+    # Install Log Intelligence plugin
+    && gem install --norc --no-document fluent-plugin-vmware-log-intelligence -v 2.0.8 \
+    #
+    # Install jemalloc 5.3.0
+    && curl -L --output /tmp/jemalloc-5.3.0.tar.bz2 https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2 \
+    && tar -C /tmp/ -xjvf /tmp/jemalloc-5.3.0.tar.bz2 \
+    && cd /tmp/jemalloc-5.3.0 \
+    && ./configure && make \
+    && mv lib/libjemalloc.so.2 /usr/lib \
+    && cd / \
+    && rm -rf /tmp/jemalloc-5.3.0* \
+    && tdnf remove -y $buildDeps \
+    && tdnf clean all \
+    && gem sources --clear-all \
+    && gem cleanup
+
+# Make sure fluentd picks jemalloc
+ENV LD_PRELOAD="/usr/lib/libjemalloc.so.2"
+
+# Standard fluentd ports
+EXPOSE 24224 5140
 
 # Copy plugins
 COPY plugins /fluentd/plugins/
@@ -86,3 +83,36 @@ ENV FLUENTD_CONF="fluent.conf"
 
 # Overwrite ENTRYPOINT to run fluentd as root for /var/log / /var/lib
 ENTRYPOINT ["tini",  "--", "/bin/entrypoint.sh"]
+
+
+# COPY Gemfile* /fluentd/
+# RUN buildDeps="sudo make gcc g++ libc-dev libffi-dev" \
+#   runtimeDeps="" \
+#   && apt-get update \
+#   #&& apt-get upgrade -y \
+#   && apt-get install \
+#      -y --no-install-recommends \
+#      $buildDeps $runtimeDeps net-tools \
+#   && gem install bundler \
+#   && bundle config silence_root_warning true \
+#   && bundle install --gemfile=/fluentd/Gemfile \ 
+#      --path=/fluentd/vendor/bundle \
+#   && SUDO_FORCE_REMOVE=yes \
+#      apt-get purge -y --auto-remove \
+#                   -o APT::AutoRemove::RecommendsImportant=false \
+#                   $buildDeps \
+#   && rm -rf /var/lib/apt/lists/* \
+#   && gem sources --clear-all \
+#   && rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
+# RUN touch /fluentd/etc/disable.conf
+
+# # Copy plugins
+# COPY plugins /fluentd/plugins/
+# COPY entrypoint.sh /fluentd/entrypoint.sh
+
+# # Environment variables
+# ENV FLUENTD_OPT=""
+# ENV FLUENTD_CONF="fluent.conf"
+
+# # Overwrite ENTRYPOINT to run fluentd as root for /var/log / /var/lib
+# ENTRYPOINT ["tini",  "--", "/bin/entrypoint.sh"]
