@@ -3,7 +3,7 @@
 
 source "https://rubygems.org"
 
-gem "fluentd", "1.16.2"
+gem "fluentd", "1.16.0"
 gem "oj", "3.11.0"
 gem "ffi"
 gem "fluent-plugin-multi-format-parser", "~> 1.0.0"
@@ -27,7 +27,7 @@ gem 'fluent-plugin-vmware-log-intelligence', "2.0.8"
 # fluent-plugin-mysqlslowquery is dependency for fluent-plugin-vmware-log-intelligence
 gem 'fluent-plugin-mysqlslowquery', "0.0.9"
 gem 'fluent-plugin-throttle', '0.0.5'
-gem 'fluent-plugin-detect-exceptions', '~> 0.0.15'
+gem 'fluent-plugin-detect-exceptions', '0.0.14'
 gem 'gelf', "3.1.0"
 gem 'logfmt', "0.0.10"
 gem 'kubeclient', "~> 4.9.3"

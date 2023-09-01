@@ -50,14 +50,9 @@
 #  && rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
 
 
-FROM fluent/fluentd:v1.16.2-debian-1.0
+FROM fluent/fluentd:v1.16.0-debian-1.0
 
 USER root
-# WORKDIR /home/fluent
-# ENV PATH /fluentd/vendor/bundle/ruby/2.7.0/bin:$PATH
-# ENV GEM_PATH /fluentd/vendor/bundle/ruby/2.7.0
-# ENV GEM_HOME /fluentd/vendor/bundle/ruby/2.7.0
-# skip runtime bundler installation
 ENV FLUENTD_DISABLE_BUNDLER_INJECTION 1
 
 COPY Gemfile* /fluentd/
@@ -68,11 +63,10 @@ RUN buildDeps="sudo make gcc g++ libc-dev libffi-dev" \
   && apt-get install \
      -y --no-install-recommends \
      $buildDeps $runtimeDeps net-tools \
-  && gem install fluent-plugin-detect-exceptions \
-  && gem install bundler -v '>= 2.4.15' \
+  && gem install bundler \
   && bundle config silence_root_warning true \
   && bundle install --gemfile=/fluentd/Gemfile \ 
-    # --path=/fluentd/vendor/bundle \
+     --path=/fluentd/vendor/bundle \
   && SUDO_FORCE_REMOVE=yes \
      apt-get purge -y --auto-remove \
                   -o APT::AutoRemove::RecommendsImportant=false \
@@ -85,7 +79,6 @@ RUN touch /fluentd/etc/disable.conf
 # Copy plugins
 COPY plugins /fluentd/plugins/
 COPY entrypoint.sh /fluentd/entrypoint.sh
-#COPY fluentd.conf /fluent/etc/fluent.conf
 
 # Environment variables
 ENV FLUENTD_OPT=""
