@@ -1,4 +1,4 @@
-FROM photon:4.0-20230826
+FROM public.ecr.aws/docker/library/photon:4.0-20230826
 
 USER root
 
