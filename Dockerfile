@@ -1,7 +1,5 @@
 FROM public.ecr.aws/docker/library/photon:4.0-20230826
 
-USER root
-
 ARG RVM_PATH=/usr/local/rvm
 ARG RUBY_VERSION=ruby-3.1.4
 ARG RUBY_PATH=/usr/local/rvm/rubies/$RUBY_VERSION
@@ -50,15 +48,15 @@ RUN tdnf install -y $BUILDDEPS \
   && curl -sSL https://rvm.io/pkuczynski.asc | gpg --import \
   && curl -sSL https://get.rvm.io | bash -s stable \
   && source /etc/profile.d/rvm.sh \
-  && rvm autolibs disable \
-  && rvm requirements \
-  && rvm install --disable-binary $RUBY_VERSION --default \
+  && $RVM_PATH/bin/rvm autolibs disable \
+  && $RVM_PATH/bin/rvm requirements \
+  && $RVM_PATH/bin/rvm install --disable-binary $RUBY_VERSION --default \
   && gem update --system --no-document \
   && gem install bundler -v '>= 2.4.15' --default --no-document \
   && rm -rf $RVM_PATH/src $RVM_PATH/examples $RVM_PATH/docs $RVM_PATH/archives \
     $RUBY_PATH/lib/ruby/gems/3.*/cache $RUBY_PATH/lib/ruby/gems/3.*/doc/ \
     /usr/share/doc /root/.bundle/cache \
-  && rvm cleanup all \  
+  && $RVM_PATH/bin/rvm cleanup all \  
   && gem sources --clear-all \
   && gem cleanup \ 
   && tdnf remove -y $BUILDDEPS \
